@@ -48,20 +48,20 @@ def _find_image(name):
         - False, 'Found more than one image with given name'
     '''
     try:
-        images_dict = __salt__['glance.image_list'](name=name)
+        images = __salt__['glance.image_list'](name=name)
     except kstone_Unauthorized:
         return False, 'keystoneclient: Unauthorized'
     except glance_Unauthorized:
         return False, 'glanceclient: Unauthorized'
-    log.debug('Got images_dict: {0}'.format(images_dict))
+    log.debug('Got images: {0}'.format(images))
 
-    # I /think/ this will still work when glance.image_list
-    # starts returning a list instead of a dictionary...
-    if len(images_dict) == 0:
+    images_list = images.values() if type(images) is dict else images
+
+    if len(images_list) == 0:
         return None, 'No image with name "{0}"'.format(name)
-    elif len(images_dict) == 1:
-        return images_dict.values()[0], 'Found image {0}'.format(name)
-    elif len(images_dict) > 1:
+    elif len(images_list) == 1:
+        return images_list[0], 'Found image {0}'.format(name)
+    elif len(images_list) > 1:
         return False, 'Found more than one image with given name'
     else:
         raise NotImplementedError
